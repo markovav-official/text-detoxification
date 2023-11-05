@@ -45,3 +45,11 @@ This metric assesses the model's effectiveness in reducing toxicity by comparing
 # Results
 
 The `t5-small` model achieved a 62.313354% reduction rate score, indicating a substantial decrease in toxic comments after detoxification. This performance demonstrates the capability of context-aware language models to effectively reduce toxicity in text. The results suggest that the `t5-small` model can be a valuable tool for automating text detoxification, with potential improvements available through further fine-tuning of larger, more powerful models.
+
+# References
+
+[Text Detoxification using Large Pre-trained Neural Models by Dale et al., page 14](https://arxiv.org/abs/2109.08914)
+
+[Text Detoxification using Large Pre-trained Neural Models](https://semion.io/doc/text-detoxification-using-large-pre-trained-neural-models)
+
+[Text Detoxification with Parallel Data](https://dardem.github.io/text_detoxification/)
