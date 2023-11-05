@@ -1,11 +1,16 @@
 import re
 
+import nltk
+import numpy as np
 import pandas as pd
-from nltk.tokenize import word_tokenize
+from joblib import Parallel, delayed
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
+from nltk.tokenize import word_tokenize
 from tqdm.notebook import tqdm
-from joblib import Parallel, delayed
+
+
+nltk.download('stopwords')
 
 stemmer = PorterStemmer()
 stop_words = set(stopwords.words('english'))
@@ -15,7 +20,7 @@ regex_non_alpha = re.compile(r'[^a-z|\s]+')
 regex_spaces = re.compile(r'\s+')
 
 
-def preprocess_text(text):
+def preprocess_text(text: str):
     text = text.lower()
     text = regex_digit.sub('', text)
     text = regex_non_alpha.sub('', text)
@@ -28,11 +33,23 @@ def preprocess_text(text):
     return ' '.join(text)
 
 
-def preprocess_text_parallel(df: pd.DataFrame, n_jobs=-1):
-    text_data = df['text'].to_numpy()
-
+def preprocess_text_parallel(text_data: np.ndarray, n_jobs=-1):
     with Parallel(n_jobs=n_jobs, backend='loky') as parallel:
         result = parallel(delayed(preprocess_text)(text) for text in tqdm(text_data, desc="Processing"))
 
-    df['text'] = result
-    return df[df['text'].str.len() > 0]
+    return result
+
+
+def transform_combined_to_classified(df: pd.DataFrame):
+    toxic_df = df[['toxic-en']]
+    toxic_df.columns = ['text']
+    toxic_df['toxic'] = 1
+
+    neutral_df = df[['neutral-en']]
+    neutral_df.columns = ['text']
+    neutral_df['toxic'] = 0
+
+    df = pd.concat([toxic_df, neutral_df], ignore_index=True)
+    df['text'] = preprocess_text_parallel(df['text'])
+    df = df[df['text'].str.len() > 0]
+    return df
